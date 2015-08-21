@@ -11,6 +11,13 @@ RUN dnf clean all && \
     dnf install -y $(curl -Ls https://plex.tv/downloads | grep "Fedora" | grep -o '[^"'"'"']*x86_64.rpm') && \
     dnf clean all
 
+# Spotify support
+#RUN dnf install -y nodejs && \
+#    dnf clean all
+# Then, download https://github.com/fuzeman/Spotify2.bundle/archive/master.zip
+# Unzip it to your plugins folder (/config/Plex Media Server/Plug-ins) as Spotify2.bundle
+# And set 797 ownership
+
 # the number of plugins that can run at the same time
 ENV PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS 6
 
