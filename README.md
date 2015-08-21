@@ -1,4 +1,7 @@
-Dockerized [Plex Media Server](https://plex.tv/).
+Dockerized [Plex Media Server](https://plex.tv/) based in [wernight/docker-plex-media-server](https://github.com/wernight/docker-plex-media-server) adapted to Fedora
+
+
+Copy & paste of his [README.md](https://github.com/wernight/docker-plex-media-server/blob/master/README.md):
 
 Usage
 -----

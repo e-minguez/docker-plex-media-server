@@ -1,39 +1,15 @@
-FROM debian:jessie
+FROM fedora:latest
+
+# Create plex user before install to avoid to be created by plex package
+RUN useradd --uid 797 -d /usr/lib/plexmediaserver -c "PlexUser" --system -s /sbin/nologin plex && \
+    mkdir /config && \
+    chown plex:plex /config
 
 # Install required packages
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create plex user
-RUN useradd --system --uid 797 -M --shell /usr/sbin/nologin plex
-
-# Hack to avoid install to fail due to upstart not being installed.
-# We won't use upstart anyway.
-RUN touch /bin/start
-RUN chmod +x /bin/start
-
-# Download and install Plex (non plexpass)
-# This gets the latest non-plexpass version
-RUN DOWNLOAD_URL=`curl -Ls https://plex.tv/downloads | grep -o '[^"'"'"']*amd64.deb' | grep -v binaries` && \
-    echo $DOWNLOAD_URL && \
-    curl -L $DOWNLOAD_URL -o plexmediaserver.deb
-RUN dpkg -i plexmediaserver.deb
-RUN rm -f plexmediaserver.deb
-
-# Hack clean-up
-RUN rm -f /bin/start
-
-# Create writable config directory in case the volume isn't mounted
-RUN mkdir /config
-RUN chown plex:plex /config
-
-VOLUME /config
-VOLUME /media
-
-USER plex
-
-EXPOSE 32400
+RUN dnf clean all && \
+    dnf update -y && \
+    dnf install -y $(curl -Ls https://plex.tv/downloads | grep "Fedora" | grep -o '[^"'"'"']*x86_64.rpm') && \
+    dnf clean all
 
 # the number of plugins that can run at the same time
 ENV PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS 6
@@ -49,6 +25,12 @@ ENV PLEX_MEDIA_SERVER_HOME /usr/lib/plexmediaserver
 ENV LD_LIBRARY_PATH /usr/lib/plexmediaserver
 ENV TMPDIR /tmp
 
+USER plex
 WORKDIR /usr/lib/plexmediaserver
+
+EXPOSE 32400
+
+VOLUME ["/config","/media"]
+
 CMD test -f /config/Plex\ Media\ Server/plexmediaserver.pid && rm -f /config/Plex\ Media\ Server/plexmediaserver.pid; \
     ulimit -s $PLEX_MAX_STACK_SIZE && ./Plex\ Media\ Server
