@@ -6,10 +6,13 @@ RUN useradd --uid 797 -d /usr/lib/plexmediaserver -c "PlexUser" --system -s /sbi
     chown plex:plex /config
 
 # Install required packages
+# Get url from https://plex.tv/api/downloads/1.json
 RUN dnf clean all && \
     dnf update -y && \
-    dnf install -y $(curl -Ls https://plex.tv/downloads | grep "Fedora" | grep -o '[^"'"'"']*x86_64.rpm') && \
-    dnf clean all
+    curl -L 'https://plex.tv/downloads/latest/1?channel=8&build=linux-ubuntu-x86_64&distro=redhat' -o plexmediaserver.rpm && \
+    dnf install -y plexmediaserver.rpm && \
+    dnf clean all && \
+    rm -f plexmediaserver.rpm
 
 # Spotify support
 #RUN dnf install -y nodejs && \
